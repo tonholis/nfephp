@@ -133,6 +133,7 @@ class Dom extends DOMDocument
                 "erro" => "Preenchimento Obrigatório!"
             );
         }
+
         if ($obrigatorio || $content !== '') {
             $content = trim($content);
             $content = htmlspecialchars($content, ENT_QUOTES);
