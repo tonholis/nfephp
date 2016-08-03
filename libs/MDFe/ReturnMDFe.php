@@ -30,7 +30,7 @@ class ReturnMDFe
         $dom->loadXMLString($xmlResp);
         //para cada $method tem um formato de retorno especifico
         switch ($method) {
-            case 'MDFeRecepcao':
+            case 'mdfeRecepcaoLote':
                 return self::zReadRecepcaoLote($dom);
                 break;
             case 'MDFeRetRecepcao':
@@ -49,7 +49,7 @@ class ReturnMDFe
                 return self::zReadConsNaoEnc($dom);
                 break;
         }
-        return array();
+        return [];
     }
     
     /**
@@ -220,32 +220,35 @@ class ReturnMDFe
     protected static function zReadRecepcaoEvento($dom)
     {
         //retorno da funçao
-        $aResposta = array(
-            'bStat' => false,
-            'versao' => '',
+        $aResposta = [
+            'bStat'    => false,
+            'versao'   => '',
             'verAplic' => '',
-            'tpAmb' => '',
-            'id' => '',
-            'cOrgao' => '',
-            'cStat' => '',
-            'xMotivo' => '',
-            'aEvent' => array()
-        );
-        $tag = $dom->getNode('retEvento');
+            'tpAmb'    => '',
+            'id'       => '',
+            'cOrgao'   => '',
+            'cStat'    => '',
+            'xMotivo'  => '',
+            'aEvent'   => []
+        ];
+
+        $tag = $dom->getNode('infEvento');
         if (! isset($tag)) {
             return $aResposta;
         }
-        $aResposta = array(
-            'bStat' => true,
-            'versao' => $tag->getAttribute('versao'),
-            'id' => $dom->getValue($tag, 'id'),
-            'tpAmb' => $dom->getValue($tag, 'tpAmb'),
+
+        $aResposta = [
+            'bStat'    => true,
+            'versao'   => $tag->getAttribute('versao'),
+            'id'       => $dom->getValue($tag, 'id'),
+            'tpAmb'    => $dom->getValue($tag, 'tpAmb'),
             'verAplic' => $dom->getValue($tag, 'verAplic'),
-            'cOrgao' => $dom->getValue($tag, 'cOrgao'),
-            'cStat' => $dom->getValue($tag, 'cStat'),
-            'xMotivo' => $dom->getValue($tag, 'xMotivo'),
-            'aEvent' => self::zGetEvent($dom, $tag)
-        );
+            'cOrgao'   => $dom->getValue($tag, 'cOrgao'),
+            'cStat'    => $dom->getValue($tag, 'cStat'),
+            'xMotivo'  => $dom->getValue($tag, 'xMotivo'),
+            'aEvent'   => self::zGetEvent($dom, $tag)
+        ];
+
         return $aResposta;
     }
     

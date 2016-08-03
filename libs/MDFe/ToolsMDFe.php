@@ -23,6 +23,7 @@ use NFePHP\MDFe\ReturnMDFe;
 use NFePHP\MDFe\MailMDFe;
 use NFePHP\MDFe\IdentifyMDFe;
 use NFePHP\Common\Dom\ValidXsd;
+use NFePHP\Extras;
 
 if (!defined('NFEPHP_ROOT')) {
     define('NFEPHP_ROOT', dirname(dirname(dirname(__FILE__))));
@@ -313,6 +314,40 @@ class ToolsMDFe extends BaseTools
     }
 
     /**
+     * validarXml
+     * Valida qualquer xml do sistema NFe com seu xsd
+     * NOTA: caso não exista um arquivo xsd apropriado retorna false
+     * @param string $xml path ou conteudo do xml
+     * @return boolean
+     */
+    public function validarXml($xml = '')
+    {
+        $aResp = array();
+        $schem = IdentifyMDFe::identificar($xml, $aResp);
+        if ($schem == '') {
+            return true;
+        }
+        $xsdFile = $aResp['Id'].'_v'.$aResp['versao'].'1.00.xsd';
+        $xsdPath = NFEPHP_ROOT.DIRECTORY_SEPARATOR .
+            'schemes' .
+            DIRECTORY_SEPARATOR .
+            'MDFe' .
+            DIRECTORY_SEPARATOR .
+            $this->aConfig['schemesMDFe'] .
+            DIRECTORY_SEPARATOR .
+            $xsdFile;
+        if (! is_file($xsdPath)) {
+            $this->errors[] = "O arquivo XSD $xsdFile não foi localizado.";
+            return false;
+        }
+        if (! ValidXsd::validar($aResp['xml'], $xsdPath)) {
+            $this->errors[] = ValidXsd::$errors;
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * sefazEnviaLote
      * @param string $xml
      * @param string $tpAmb
@@ -327,7 +362,7 @@ class ToolsMDFe extends BaseTools
         $xml,
         $tpAmb = '2',
         $idLote = '',
-        &$aRetorno = array()
+        &$aRetorno = []
     ) {
         if (empty($xml)) {
             $msg = "Pelo menos uma MDFe deve ser informada.";
@@ -580,17 +615,17 @@ class ToolsMDFe extends BaseTools
      * @throws Exception\InvalidArgumentException
      */
     public function sefazCancela(
-        $chave = '',
-        $tpAmb = '2',
+        $chMDFe     = '',
+        $tpAmb      = '2',
         $nSeqEvento = '1',
-        $nProt = '',
-        $xJust = '',
-        &$aRetorno = array()
+        $nProt      = '',
+        $xJust      = '',
+        &$aRetorno  = []
     ) {
         if ($tpAmb == '') {
             $tpAmb = $this->aConfig['tpAmb'];
         }
-        $chMDFe = preg_replace('/[^0-9]/', '', $chave);
+        $chMDFe = preg_replace('/[^0-9]/', '', $chMDFe);
         $nProt = preg_replace('/[^0-9]/', '', $nProt);
         $xJust = Strings::cleanString($xJust);
         if (strlen($chMDFe) != 44) {
@@ -613,7 +648,9 @@ class ToolsMDFe extends BaseTools
         }
         $tagAdic = "<evCancMDFe><descEvento>Cancelamento</descEvento>"
                 . "<nProt>$nProt</nProt><xJust>$xJust</xJust></evCancMDFe>";
-        $retorno = $this->zSefazEvento($siglaUF, $chMDFe, $tpAmb, $tpEvento, $nSeqEvento, $tagAdic);
+        $cOrgao = 43;
+
+        $retorno = $this->zSefazEvento($siglaUF, $chMDFe, $cOrgao, $tpAmb, $tpEvento, $nSeqEvento,  $tagAdic);
         $aRetorno = $this->aLastRetEvent;
         return $retorno;
     }
@@ -661,7 +698,10 @@ class ToolsMDFe extends BaseTools
         $tagAdic = "<evEncMDFe><descEvento>Encerramento</descEvento>"
                 . "<nProt>$nProt</nProt><dtEnc>$dtEnc</dtEnc><cUF>$cUF</cUF>"
                 . "<cMun>$cMun</cMun></evEncMDFe>";
-        $retorno = $this->zSefazEvento($siglaUF, $chMDFe, $tpAmb, $tpEvento, $nSeqEvento, $tagAdic);
+        $cOrgao = '43';
+
+        $retorno = $this->zSefazEvento($siglaUF, $chMDFe, $cOrgao, $tpAmb, $tpEvento, $nSeqEvento,  $tagAdic);
+
         $aRetorno = $this->aLastRetEvent;
         return $retorno;
     }
@@ -785,7 +825,7 @@ class ToolsMDFe extends BaseTools
      */
     protected function zSefazEvento(
         $siglaUF = '',
-        $chave = '',
+        $chMDFe = '',
         $cOrgao = '',
         $tpAmb = '2',
         $tpEvento = '',
@@ -812,7 +852,7 @@ class ToolsMDFe extends BaseTools
         $cnpj = $this->aConfig['cnpj'];
         $dhEvento = (string) str_replace(' ', 'T', date('Y-m-d H:i:sP'));
         $sSeqEvento = str_pad($nSeqEvento, 2, "0", STR_PAD_LEFT);
-        $eventId = "ID".$tpEvento.$chave.$sSeqEvento;
+        $eventId = "ID".$tpEvento.$chMDFe.$sSeqEvento;
         if ($cOrgao == '') {
             $cOrgao = $this->urlcUF;
         }
@@ -821,7 +861,7 @@ class ToolsMDFe extends BaseTools
             . "<cOrgao>$cOrgao</cOrgao>"
             . "<tpAmb>$tpAmb</tpAmb>"
             . "<CNPJ>$cnpj</CNPJ>"
-            . "<chMDFe>$chave</chMDFe>"
+            . "<chMDFe>$chMDFe</chMDFe>"
             . "<dhEvento>$dhEvento</dhEvento>"
             . "<tpEvento>$tpEvento</tpEvento>"
             . "<nSeqEvento>$nSeqEvento</nSeqEvento>"

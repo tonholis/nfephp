@@ -590,7 +590,8 @@ class MDFeNFePHP {
      * @param  array
      * @return boolean true sucesso false Erro
      */
-    function __construct($aConfig='',$mododebug=0,$exceptions=false) {
+    public function __construct($aConfig='',$mododebug=0,$exceptions=false)
+    {
         if (is_numeric($mododebug)) {
             $this->debugMode = $mododebug;
         }

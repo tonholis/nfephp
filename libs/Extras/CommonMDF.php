@@ -2,7 +2,7 @@
 
 namespace NFePHP\Extras;
 
-class CommonNFePHP
+class CommonMDF
 {
     /**
      * pAdicionaLogoPeloCnpj
@@ -63,14 +63,14 @@ class CommonNFePHP
         if (empty($theObj)) {
             return '';
         }
-        
+
         //if (!($theObj instanceof DOMDocument) && !($theObj instanceof DOMElement)) {
         //    throw new nfephpException(
         //        "Metodo CommonNFePHP::pSimpleGetValue() "
         //        . "com parametro do objeto invalido, verifique!"
         //    );
         //}
-        
+
         $vct = $theObj->getElementsByTagName($keyName)->item($itemNum);
         if (isset($vct)) {
             return $extraTextBefore . trim($vct->nodeValue) . $extraTextAfter;
@@ -136,7 +136,7 @@ class CommonNFePHP
      * @param  string $data Parâmetro extraido da NFe
      * @return string Formatada para apresentação da data no padrão brasileiro
      */
-    protected function pYmd2dmy($data = '')
+    protected function __ymd2dmy($data = '')
     {
         if ($data == '') {
             return '';
@@ -156,7 +156,7 @@ class CommonNFePHP
      * @param  string $DH Informação de data e tempo extraida da NFe
      * @return timestamp UNIX Para uso com a funçao date do php
      */
-    protected function pConvertTime($DH = '')
+    protected function __convertTime($DH = '')
     {
         if ($DH == '') {
             return '';
@@ -183,7 +183,7 @@ class CommonNFePHP
      * @param  string $mascara Regra de formatção da string (ex. ##.###.###/####-##)
      * @return string Retorna o campo formatado
      */
-    protected function pFormat($campo = '', $mascara = '')
+    protected function __format($campo = '', $mascara = '')
     {
         if ($campo == '' || $mascara == '') {
             return $campo;
@@ -307,7 +307,7 @@ class CommonNFePHP
      * @param  number  $vOffSet incremento forçado na na posição Y
      * @return number $height Qual a altura necessária para desenhar esta textBox
      */
-    protected function pTextBox(
+    protected function __textBox(
         $x,
         $y,
         $w,
